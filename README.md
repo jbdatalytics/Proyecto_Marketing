@@ -86,21 +86,27 @@ El segundo archivo (customer-details.xlsx) contiene información adicional sobre
 - **id**: identificador único del cliente.
 
 
+## Herramientas utilizadas para el análisis
+
+- **Python**: Análisis exploratorio de datos y visualizaciones.
+- **Pandas y NumPy**: Limpieza y manipulación de datos.
+- **Seaborn y Matplotlib**: Visualización de datos.
+
+
 ## Desarrollo del Proyecto
 
 - Se realiza un primer análisis de los datos para entender su estructura.
-- El archivo customer-details.xlsx no contiene nulos ni duplicados. El dataset está limpio y solo se hacen unas pequeñas normalizaciones.
+- El archivo customer-details.xlsx consta de 3 hojas y tienen las mismas columnas, por lo tanto se concatenan en un único dataframe para un mejor análisis. El dataset está limpio, no contiene nulos ni duplicados, y solo se hacen unas pequeñas normalizaciones.
 - En el caso del archivo bank-additional.csv empezamos con la transformación de los datos, eliminando duplicados, agregando
 nuevas columnas y normalizando los datos.
-- Se continúa con el análisis descriptivo de las columnas categóricas y temporales. Se eliminan valores nulos con el método fillna.
-- Se identifican y tratan valores nulos en variables clave como education, default y job.
-- Se realiza el análisis descriptivo de las columnas numéricas. Se generan gráficas (boxplots) para verificar la presencia de outliers y eliminar nulos en función
-de un umbral del 5%.
-- Para los valores por debajo del umbral se imputa con el método fillna y las columnas con un porcentaje de nulos superior al umbral se imputan con el método iterativeimputer.
+- Se continúa con el análisis descriptivo de las columnas categóricas y temporales. Se eliminan valores nulos con el método fillna, imputando con la moda. Casi todos los valores tienen un porcentaje muy pequeño de nulos, y en el caso de "default" (con casi el 21% de nulos) es una variable binaria (si/no) cuyo 100% de respuestas es "no", con lo cual la moda es el método más recomendado para su gestión.
+- Se realiza el análisis descriptivo de las columnas numéricas. Se generan gráficas (boxplots) para verificar la presencia de outliers, se eliminan aquellos que no son representativos y se reemplazan por la mediana. 
+- Se gestionan los nulos de las columnas numéricas en función de un umbral del 5%. Para los valores por debajo del umbral se imputa con el método fillna reemplazando por la mediana. 
+- Las columnas con un porcentaje de nulos superior al umbral se imputan con el método iterativeimputer (mejor método para datos predecibles con correlación) en el caso de 'Age', y en el caso de 'Euribo3M' se imputan con el método KNN (mejor para datos con patrones más complejos).
 - Se convirtieron variables booleanas en formatos adecuados para el análisis (yes/no).
-- Finalmente se unifican ambos archivos y se crean visualizaciones para representar patrones y tendencias clave.
-- Recopilamos los insights que se han deducido del análisis.
-
+- Finalmente se unifican ambos archivos, uso left join para mantener todas las filas de df_bank (la tabla principal) y agregar la información de df_customer cuando haya coincidencias entre Id_ e Id, y así evitar perder datos en df_bank, incluso si no hay coincidencias en df_customer.
+- Luego se crean visualizaciones para representar patrones y tendencias clave.
+- Recopilamos los insights que se han deducido del análisis. 
 
 ## Conclusiones
 

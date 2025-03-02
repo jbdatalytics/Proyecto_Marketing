@@ -4,11 +4,24 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 import seaborn as sns
+import math
 
 def subplot_col_cat(dataframe):
+    """
+    Crea subgráficos de barras para cada columna categórica del DataFrame.
 
+    Esta función selecciona las columnas de tipo 'object' o 'category' del DataFrame y genera un gráfico 
+    de barras para cada una, mostrando la frecuencia de los valores. Los subgráficos se organizan de manera 
+    automática en una cuadrícula según la cantidad de columnas categóricas.
+
+    Parámetros:
+    dataframe (pd.DataFrame): DataFrame con las columnas categóricas a graficar.
+
+    Retorno:
+    None: La función muestra los gráficos de barras, pero no retorna ningún valor.
+    """
     # seleccionar columnas categóricas
-    categorical_cols= dataframe.select_dtypes(include= ['object', 'category']).columns
+    categorical_cols= dataframe.select_dtypes(include= ['object']).columns
 
     if len (categorical_cols) == 0:
         print('No hay columnas categóricas en el dataframe')
@@ -16,8 +29,8 @@ def subplot_col_cat(dataframe):
     
     # configurar el tamaño de la figura  
     num_cols=len(categorical_cols)
-    rows= (num_cols + 5) // 4 
-    fig, axes= plt.subplots(rows, 3, figsize=(15, rows * 5))
+    rows = math.ceil(num_cols / 4)
+    fig, axes= plt.subplots(rows, 4, figsize=(15, rows * 5))
     axes= axes.flatten()          
 
     # generar gráficos para cada columna categórica  
@@ -37,6 +50,20 @@ def subplot_col_cat(dataframe):
 
 
 def subplot_col_num(dataframe,col):
+    """
+    Crea un conjunto de subgráficos para visualizar la distribución y los valores atípicos de las columnas numéricas.
+
+    La función genera un gráfico de histograma y un boxplot para cada columna numérica especificada en la lista `col`.
+    Los histogramas muestran la distribución de los valores, mientras que los boxplots visualizan los valores atípicos.
+    Los gráficos se organizan en una cuadrícula con una fila para cada columna numérica.
+
+    Parámetros:
+    dataframe (pd.DataFrame): DataFrame que contiene las columnas numéricas a analizar.
+    col (list): Lista de nombres de las columnas numéricas para las que se generarán los gráficos.
+
+    Retorno:
+    None: La función genera los gráficos y los muestra, pero no retorna ningún valor.
+    """
 
 # Creo una sola paleta de gráficos de histogramas y boxplot para un mejor análisis
     num_graphs=len(col)
@@ -61,6 +88,19 @@ def subplot_col_num(dataframe,col):
 
 
 def subplot_subs_cat(dataframe):
+    """
+    Crea un conjunto de subgráficos para visualizar la tasa de suscripción de una variable categórica.
+
+    La función genera tres gráficos de barras, cada uno correspondiente a una variable categórica 
+    ('Job', 'Marital', 'Education') que muestra la tasa de suscripción ('Y') en porcentaje. Los gráficos
+    presentan cómo varía la tasa de suscripción según las categorías de cada una de estas variables.
+
+    Parámetros:
+    dataframe (pd.DataFrame): DataFrame que contiene las variables categóricas y la columna 'Y' (indicador de suscripción).
+
+    Retorno:
+    None: La función genera los gráficos y los muestra, pero no retorna ningún valor.
+    """
 
     # Configurar estilo
     sns.set_style("whitegrid")
@@ -93,6 +133,20 @@ def subplot_subs_cat(dataframe):
 
     
 def subplot_subs_relationships(df):
+    """
+    Crea una cuadrícula de subgráficos que muestra la relación entre varias variables y la suscripción ('Y').
+
+    La función genera cuatro gráficos: dos histogramas y dos gráficos de barras, para visualizar la relación 
+    entre las variables numéricas y categóricas con la variable de suscripción ('Y'). Los gráficos permiten 
+    observar cómo varían las distribuciones y las frecuencias de suscripción según las características de las 
+    variables 'Age_iterative', 'Income', 'Kidhome' y 'Teenhome'.
+
+    Parámetros:
+    df (pd.DataFrame): DataFrame que contiene las variables 'Age_iterative', 'Income', 'Kidhome', 'Teenhome' y 'Y' (indicador de suscripción).
+
+    Retorno:
+    None: La función genera los gráficos y los muestra, pero no retorna ningún valor.
+    """
    
     fig, axes = plt.subplots(2, 2, figsize=(20, 14))  
 
@@ -126,6 +180,19 @@ def subplot_subs_relationships(df):
 
 
 def subplot_contact_and_duration(df):
+    """
+    Crea una cuadrícula de subgráficos que muestra la tasa de suscripción por método de contacto y por duración de llamada.
+
+    La función genera dos gráficos de barras para visualizar la tasa de suscripción en función de dos variables:
+    el método de contacto ('Contact') y la duración de la llamada ('Duration'). Los gráficos permiten comparar 
+    la tasa de conversión (suscripción) para diferentes categorías de contacto y duración de llamada.
+
+    Parámetros:
+    df (pd.DataFrame): DataFrame que contiene las columnas 'Contact', 'Duration', y 'Y' (indicador de suscripción).
+
+    Retorno:
+    None: La función genera los gráficos y los muestra, pero no retorna ningún valor.
+    """
 
     fig, axes = plt.subplots(1, 2, figsize=(18, 6))  # Crear figura con 1 fila y 2 columnas
 
@@ -180,6 +247,22 @@ def subplot_contact_and_duration(df):
 
 
 def subplot_subs_by_credit_factors(df):
+    """
+    Crea una cuadrícula de subgráficos que muestra la tasa de suscripción en función de factores de crédito.
+
+    La función genera tres gráficos de barras que visualizan la tasa de suscripción ('Y') en relación con tres variables:
+    el historial de crédito ('Default'), la posesión de vivienda ('Housing') y si se tiene un préstamo personal ('Loan').
+    Cada gráfico presenta la tasa de conversión de suscripción para las diferentes categorías de estas variables.
+
+    Parámetros:
+    df (pd.DataFrame): DataFrame que contiene las columnas 'Y', 'Default', 'Housing', y 'Loan'.
+
+    Retorno:
+    None: La función genera los gráficos y los muestra, pero no retorna ningún valor.
+
+    La columna 'Y' se mapea a valores numéricos, donde 'yes' se convierte en 1 y 'no' en 0, para calcular la tasa de suscripción por cada categoría de las variables de crédito.
+    Las barras de los gráficos se etiquetan con los valores porcentuales correspondientes.
+    """
    
     df['Y_numeric'] = df['Y'].map({'yes': 1, 'no': 0})
 

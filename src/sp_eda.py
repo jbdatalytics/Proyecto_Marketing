@@ -1,10 +1,19 @@
 import pandas as pd
 import numpy as np
 
-from sklearn.experimental import enable_iterative_imputer
-from sklearn.impute import IterativeImputer
 
 def calcular_nulos (dataframe):
+    """
+    Calcula el número total y el porcentaje de valores nulos por cada columna en un DataFrame.
+
+    Parámetros:
+    dataframe (pd.DataFrame): El DataFrame sobre el que se calcularán los valores nulos.
+
+    Retorno:
+    tupla: Una tupla que contiene dos objetos pandas:
+        - El primero es una Serie con el número de valores nulos por columna.
+        - El segundo es una Serie con el porcentaje de valores nulos por columna.
+    """
 
     numero_nulos= dataframe.isnull().sum()
     porcentaje_nulos= round((dataframe.isnull().sum()/dataframe.shape[0]) *100,2)
@@ -12,6 +21,19 @@ def calcular_nulos (dataframe):
 
 
 def analisis_col_cat(dataframe):
+    """
+    Realiza un análisis descriptivo de las columnas categóricas de un DataFrame.
+    Para cada columna categórica, muestra:
+    - La cantidad de valores únicos.
+    - La distribución de frecuencias normalizada (porcentaje).
+    - Un resumen estadístico de la columna.
+
+    Parámetros:
+    dataframe (pd.DataFrame): El DataFrame que contiene las columnas categóricas a analizar.
+
+    Retorno:
+    None: Imprime los resultados del análisis.
+    """
 
     col_cat=dataframe.select_dtypes(include='O').columns 
 
@@ -29,6 +51,19 @@ def analisis_col_cat(dataframe):
 
 
 def calcular_solo_col_nul(dataframe, umbral=10):
+    """
+    Calcula y devuelve las columnas con valores nulos en un DataFrame, separadas por un umbral de porcentaje de nulos.
+    - Muestra información sobre las columnas con nulos (tipo de datos, número de nulos y porcentaje de nulos).
+    - Separa las columnas con porcentaje de nulos superior al umbral de aquellas que tienen un porcentaje de nulos inferior.
+
+    Parámetros:
+    dataframe (pd.DataFrame): El DataFrame sobre el que se realizará el análisis.
+    umbral (float): El porcentaje de nulos que se considera alto. Las columnas con un porcentaje de nulos superior a este umbral se consideran de alto porcentaje de nulos.
+
+    Retorno:
+    high_null_cols (list): Lista de nombres de columnas con un porcentaje de nulos superior al umbral.
+    low_null_cols (list): Lista de nombres de columnas con un porcentaje de nulos inferior o igual al umbral.
+    """
 
     columns_with_nulls= dataframe.columns[dataframe.isnull().any()]
 
@@ -45,11 +80,75 @@ def calcular_solo_col_nul(dataframe, umbral=10):
     return high_null_cols, low_null_cols
 
 
-def imputar_iterative(dataframe, lista_columnas):
-    iter_imputer = IterativeImputer(max_iter=50, random_state=42)
-    data_imputed = iter_imputer.fit_transform(dataframe[lista_columnas])
-    new_col = [col + '_iterative' for col in lista_columnas]
-    dataframe[new_col] = data_imputed
+def imputar_moda(df):
+    """
+    Rellena los valores nulos de un DataFrame con la moda de cada columna.
 
-    display(dataframe[new_col].describe().T)
-    return dataframe, new_col
+    Parámetros:
+    df (pd.DataFrame): DataFrame con valores nulos a rellenar.
+
+    Retorna:
+    pd.DataFrame: DataFrame con los valores nulos reemplazados por la moda.
+    """
+    for col in df.columns:
+        if df[col].isnull().sum() > 0:  # Verificar si la columna tiene valores nulos
+            moda = df[col].mode()[0]  # Obtener la moda de la columna
+            df[col] = df[col].fillna(moda)  # Imputar la moda
+
+
+def contar_outliers(df):
+    """
+    Cuenta los outliers en cada columna numérica de un DataFrame usando el método del rango intercuartílico (IQR).
+
+    - Calcula los cuartiles Q1 y Q3 de cada columna numérica.
+    - Determina los límites inferior y superior para detectar outliers.
+    - Cuenta y muestra el número y porcentaje de outliers por columna.
+
+    Parámetros:
+    df (pd.DataFrame): DataFrame a analizar.
+
+    Retorno:
+    None (los resultados se muestran y se almacenan en un diccionario).
+    """
+
+    numeric_cols = df.select_dtypes(include=['number']).columns
+    outlier_counts = {}
+
+    for col in numeric_cols:
+        Q1 = df[col].quantile(0.25)
+        Q3 = df[col].quantile(0.75)
+        IQR = Q3 - Q1
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+
+        outliers = df[(df[col] < lower_bound) | (df[col] > upper_bound)].shape[0]
+        percentage = round(outliers / df.shape[0] * 100, 2)
+
+        outlier_counts[col] = {'count': outliers, 'percentage': percentage}
+        print(f'Para la columna {col.upper()} tenemos {outliers} outliers, lo que representa un {percentage}% de los datos.')
+
+
+def eliminar_outliers(df, columnas):
+    """
+    Elimina outliers en las columnas numéricas de un DataFrame usando el método IQR,
+    reemplazándolos por la mediana de la columna.
+
+    Parámetros:
+    df (pd.DataFrame): DataFrame con los datos.
+    columnas (list): Lista de nombres de columnas a analizar.
+
+    Retorna:
+    pd.DataFrame: DataFrame con los outliers eliminados.
+    """
+    for col in columnas:
+        Q1 = df[col].quantile(0.25)
+        Q3 = df[col].quantile(0.75)
+        IQR = Q3 - Q1
+        
+        limite_inferior = Q1 - 1.5 * IQR
+        limite_superior = Q3 + 1.5 * IQR
+        
+        mediana = df[col].median()
+        
+        df[col] = np.where((df[col] < limite_inferior) | (df[col] > limite_superior), mediana, df[col])
+    
